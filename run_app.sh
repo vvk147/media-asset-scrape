@@ -7,4 +7,4 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Run the Streamlit app
-streamlit run company_data_comparison_ui.py 
+streamlit run streamlit_app.py 
