@@ -15,6 +15,27 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def get_api_key(key_name: str) -> Optional[str]:
+    """Get API key from environment or return None."""
+    return os.getenv(key_name)
+
+# API Keys will be set dynamically when needed
+SCRAPINGANT_API_KEY: Optional[str] = None
+EXA_API_KEY: Optional[str] = None
+
+def set_api_keys(scrapingant_key: Optional[str], exa_key: Optional[str]):
+    """Set API keys globally."""
+    global SCRAPINGANT_API_KEY, EXA_API_KEY
+    SCRAPINGANT_API_KEY = scrapingant_key
+    EXA_API_KEY = exa_key
+
+def validate_api_keys():
+    """Validate that required API keys are set."""
+    if not SCRAPINGANT_API_KEY or not EXA_API_KEY:
+        raise ValueError(
+            "API keys are required. Please set your API keys in the sidebar before proceeding."
+        )
+
 def get_required_env_var(var_name: str) -> str:
     """Get a required environment variable or raise an error with a helpful message."""
     value = os.getenv(var_name)
@@ -25,10 +46,6 @@ def get_required_env_var(var_name: str) -> str:
             f"You can copy .env.example to .env and fill in your values."
         )
     return value
-
-# API Keys
-SCRAPINGANT_API_KEY = get_required_env_var("SCRAPINGANT_API_KEY")
-EXA_API_KEY = get_required_env_var("EXA_API_KEY")
 
 @dataclass
 class ApiUsage:
@@ -209,6 +226,9 @@ def analyze_company_data(company_url: str) -> Dict:
     logger.info(f"Analyzing company data for: {company_url}")
     
     try:
+        # Validate API keys before proceeding
+        validate_api_keys()
+        
         scraper = ScrapingAntScraper(SCRAPINGANT_API_KEY)
         html_content = scraper.scrape_page(company_url)
         
@@ -238,6 +258,10 @@ def analyze_company_data(company_url: str) -> Dict:
         else:
             results["error"] = "Failed to scrape website content"
             
+    except ValueError as e:
+        # This will catch the API key validation error
+        logger.error(f"Validation Error: {str(e)}")
+        results["error"] = str(e)
     except Exception as e:
         logger.error(f"Analysis Exception: {str(e)}")
         results["error"] = str(e)

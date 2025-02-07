@@ -269,11 +269,8 @@ def display_api_analytics():
         st.error(f"Failed to load API usage statistics: {usage_stats['error']}")
 
 def main():
-    # Check if API keys are set
+    # Load API keys
     scrapingant_key, exa_key = load_api_keys()
-    if not scrapingant_key or not exa_key:
-        st.warning("⚠️ Please set your API keys in the sidebar before proceeding.")
-        return
 
     if page == "Company Analysis":
         st.title("🏢 Company Data Analysis Tool")
@@ -286,12 +283,15 @@ def main():
         )
         
         if st.button("Analyze Company", type="primary"):
+            if not scrapingant_key or not exa_key:
+                st.error("⚠️ Please set your API keys in the sidebar before proceeding.")
+                return
+                
             if company_url:
                 with st.spinner("Analyzing company data..."):
                     try:
-                        # Set environment variables for the analysis
-                        os.environ["SCRAPINGANT_API_KEY"] = scrapingant_key
-                        os.environ["EXA_API_KEY"] = exa_key
+                        # Set API keys for analysis
+                        set_api_keys(scrapingant_key, exa_key)
                         
                         results = analyze_company_data(company_url)
                         
