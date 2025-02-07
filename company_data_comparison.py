@@ -15,9 +15,20 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def get_required_env_var(var_name: str) -> str:
+    """Get a required environment variable or raise an error with a helpful message."""
+    value = os.getenv(var_name)
+    if not value:
+        raise EnvironmentError(
+            f"Missing required environment variable: {var_name}\n"
+            f"Please set this in your .env file or environment variables.\n"
+            f"You can copy .env.example to .env and fill in your values."
+        )
+    return value
+
 # API Keys
-SCRAPINGANT_API_KEY = os.getenv("SCRAPINGANT_API_KEY", "c122e752650a4f5da79dd7b65be45ef8")
-EXA_API_KEY = os.getenv("EXA_API_KEY", "ae83f8f2-1894-4b47-9df3-08b1d4c15cc5")
+SCRAPINGANT_API_KEY = get_required_env_var("SCRAPINGANT_API_KEY")
+EXA_API_KEY = get_required_env_var("EXA_API_KEY")
 
 @dataclass
 class ApiUsage:
