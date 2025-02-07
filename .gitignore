@@ -35,6 +35,7 @@ ENV/
 api_usage.csv
 company_data_history.csv
 .env
+commit_message.txt
 
 # Logs
 *.log

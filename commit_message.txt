@@ -1,5 +1,0 @@
-📝 chore(deploy): Prepare for Streamlit deployment
-
-- Rename UI file to streamlit_app.py for Streamlit Cloud compatibility
-- Update requirements.txt with exact package versions
-- Ensure proper entry point configuration 
