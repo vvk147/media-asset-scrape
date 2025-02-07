@@ -9,10 +9,19 @@ import plotly.express as px
 from datetime import datetime, timedelta
 from typing import Optional
 from dotenv import load_dotenv
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file in local development
 if os.getenv("DEPLOYMENT_ENV") != "production":
     load_dotenv()
+    logger.info("Loaded environment variables from .env file")
 
 # Ensure the virtual environment is being used
 def check_venv():
@@ -370,17 +379,18 @@ def main():
                                 st.subheader("Media Assets")
                                 cols = st.columns(3)
                                 for i, asset in enumerate(company_data["media_assets"]):
-                                    if asset.type == "image":
+                                    if asset["type"] == "image":
                                         with cols[i % 3]:
                                             st.image(
-                                                asset.url,
-                                                caption=asset.alt if asset.alt else "No caption",
+                                                asset["url"],
+                                                caption=asset["alt"] if asset["alt"] else "No caption",
                                                 use_column_width=True
                                             )
                         else:
                             st.error(f"Analysis failed: {results['error']}")
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
+                        logger.error(f"Full error details: {str(e)}", exc_info=True)
             else:
                 st.warning("Please enter a company URL")
         
