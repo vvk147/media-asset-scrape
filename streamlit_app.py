@@ -370,11 +370,11 @@ def main():
                                 st.subheader("Media Assets")
                                 cols = st.columns(3)
                                 for i, asset in enumerate(company_data["media_assets"]):
-                                    if asset["type"] == "image":
+                                    if asset.type == "image":
                                         with cols[i % 3]:
                                             st.image(
-                                                asset["url"],
-                                                caption=asset["alt"] if asset["alt"] else "No caption",
+                                                asset.url,
+                                                caption=asset.alt if asset.alt else "No caption",
                                                 use_column_width=True
                                             )
                         else:

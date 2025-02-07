@@ -247,9 +247,28 @@ def analyze_company_data(company_url: str) -> Dict:
                 ) / 4.0 * 100
             }
             
+            # Convert dataclass to dict for JSON serialization
+            company_dict = {
+                "name": company_data.name,
+                "domain": company_data.domain,
+                "description": company_data.description,
+                "logo_url": company_data.logo_url,
+                "social_links": company_data.social_links,
+                "media_assets": [
+                    {
+                        "type": asset.type,
+                        "url": asset.url,
+                        "alt": asset.alt,
+                        "metadata": asset.metadata
+                    }
+                    for asset in company_data.media_assets
+                ],
+                "scrape_date": company_data.scrape_date.isoformat()
+            }
+            
             results.update({
                 "success": True,
-                "company_data": company_data.__dict__,
+                "company_data": company_dict,
                 "metrics": metrics
             })
             

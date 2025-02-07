@@ -1,1 +1,1 @@
-✨ feat(env): Add automatic API key loading from .env in local development
+🐛 fix(data): Fix MediaAsset dataclass handling
