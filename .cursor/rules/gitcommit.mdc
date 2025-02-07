@@ -1,0 +1,15 @@
+---
+description: Rules for conventional git commits
+globs: 
+---
+Here's the breakdown of the commit message:
+
+- **`📝 chore:`**: General updates to the code that do not affect the app's functionality (like updating configs).
+- **`✨ feat(<scope>):`**: A new feature for the user, or a change that implies some sort of enhancement.
+- **`🐛 fix(<scope>):`**: A bug fix for the user.
+- **`🎨 style(<scope>):`**: Improvements or corrections to the style/formatting of the code.
+- **`🧪 test(<scope>):`**: Adding missing tests or correcting existing ones.
+- **`📚 docs:`**: Documentation-only changes.
+- **`📦 refactor:`**: Changes that neither fix a bug nor add a feature, typically code refactoring.
+
+Remember to replace **`<scope>`** with the part of the application that is affected (e.g., **`ui-components`**, **`auth`**).
