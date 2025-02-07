@@ -3,11 +3,16 @@ import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-from company_data_comparison import analyze_company_data, get_api_usage_stats
+from company_data_comparison import analyze_company_data, get_api_usage_stats, set_api_keys
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file in local development
+if os.getenv("DEPLOYMENT_ENV") != "production":
+    load_dotenv()
 
 # Ensure the virtual environment is being used
 def check_venv():
@@ -30,10 +35,23 @@ def load_api_keys() -> tuple[Optional[str], Optional[str]]:
         )
     else:
         # In local development, prefer environment variables
-        return (
-            os.getenv("SCRAPINGANT_API_KEY") or st.session_state.get("SCRAPINGANT_API_KEY"),
-            os.getenv("EXA_API_KEY") or st.session_state.get("EXA_API_KEY")
-        )
+        scrapingant_key = os.getenv("SCRAPINGANT_API_KEY")
+        exa_key = os.getenv("EXA_API_KEY")
+        
+        # If either key is missing from env, try session state
+        if not scrapingant_key or not exa_key:
+            return (
+                scrapingant_key or st.session_state.get("SCRAPINGANT_API_KEY"),
+                exa_key or st.session_state.get("EXA_API_KEY")
+            )
+        
+        # Store env keys in session state for consistency
+        if "SCRAPINGANT_API_KEY" not in st.session_state:
+            st.session_state["SCRAPINGANT_API_KEY"] = scrapingant_key
+        if "EXA_API_KEY" not in st.session_state:
+            st.session_state["EXA_API_KEY"] = exa_key
+        
+        return (scrapingant_key, exa_key)
 
 def save_api_keys(scrapingant_key: str, exa_key: str):
     """Save API keys to session state"""
@@ -69,18 +87,26 @@ st.sidebar.title("Settings")
 with st.sidebar.expander("API Key Management", expanded=True):
     scrapingant_key, exa_key = load_api_keys()
     
+    # Show current source of API keys
+    if os.getenv("DEPLOYMENT_ENV") != "production":
+        if os.getenv("SCRAPINGANT_API_KEY") and os.getenv("EXA_API_KEY"):
+            st.success("✅ Using API keys from .env file")
+            st.info("You can override these keys below if needed")
+    
     new_scrapingant_key = st.text_input(
         "ScrapingAnt API Key",
         value=scrapingant_key or "",
         type="password",
-        help="Enter your ScrapingAnt API key"
+        help="Enter your ScrapingAnt API key" + 
+             (" (currently using from .env)" if os.getenv("SCRAPINGANT_API_KEY") else "")
     )
     
     new_exa_key = st.text_input(
         "Exa.ai API Key",
         value=exa_key or "",
         type="password",
-        help="Enter your Exa.ai API key"
+        help="Enter your Exa.ai API key" + 
+             (" (currently using from .env)" if os.getenv("EXA_API_KEY") else "")
     )
     
     if st.button("Save API Keys"):

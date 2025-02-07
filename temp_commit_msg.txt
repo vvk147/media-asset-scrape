@@ -1,1 +1,1 @@
-🔒 fix(security): Improve API key handling for deployment
+✨ feat(env): Add automatic API key loading from .env in local development
