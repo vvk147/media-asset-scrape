@@ -1096,6 +1096,12 @@ def main():
                     del st.session_state[key]
             st.session_state.current_page = page
         
+        # Set API keys for the entire session
+        set_api_keys(
+            st.session_state.get("SCRAPINGANT_API_KEY", ""),
+            st.session_state.get("EXA_API_KEY", "")
+        )
+        
         if page == "Company Analysis":
             st.title("🏢 Company Data Analysis Tool")
             
@@ -1111,16 +1117,13 @@ def main():
                 )
                 
                 if st.button("Analyze Company", type="primary"):
-                    if not scrapingant_key or not exa_key:
+                    if not st.session_state.get("SCRAPINGANT_API_KEY") or not st.session_state.get("EXA_API_KEY"):
                         st.error("⚠️ Please set your API keys in the sidebar before proceeding.")
                         return
                         
                     if company_url:
                         with st.spinner("Analyzing company data..."):
                             try:
-                                # Set API keys for analysis
-                                set_api_keys(scrapingant_key, exa_key)
-                                
                                 results = analyze_company_data(company_url)
                                 
                                 if results["success"]:
