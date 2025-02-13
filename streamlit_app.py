@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-from company_data_comparison import analyze_company_data, get_api_usage_stats, set_api_keys, ExaSearcher, ScrapingAntScraper, MediaAsset
+from company_data_comparison import analyze_company_data, get_api_usage_stats, set_api_keys, MediaAsset
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
@@ -31,20 +31,18 @@ st.set_page_config(
 # Load environment variables only once at startup
 if "env_loaded" not in st.session_state:
     if os.getenv("STREAMLIT_DEPLOYMENT") == "true":
-        # In Streamlit Cloud, use secrets
-        logger.info("Running in Streamlit Cloud, using secrets")
-        st.session_state["env_loaded"] = True
-        # Initialize with empty values in deployment
-        st.session_state["SCRAPINGANT_API_KEY"] = ""
-        st.session_state["EXA_API_KEY"] = ""
+        # In Streamlit Cloud, use secrets if available
+        logger.info("Running in Streamlit Cloud")
+        st.session_state["SCRAPINGANT_API_KEY"] = st.secrets.get("SCRAPINGANT_API_KEY", "")
+        st.session_state["EXA_API_KEY"] = st.secrets.get("EXA_API_KEY", "")
     else:
         # In local development, use .env file
         load_dotenv()
         logger.info("Running locally, loaded environment from .env file")
-        st.session_state["env_loaded"] = True
-        # Initialize with values from .env
         st.session_state["SCRAPINGANT_API_KEY"] = os.getenv("SCRAPINGANT_API_KEY", "")
         st.session_state["EXA_API_KEY"] = os.getenv("EXA_API_KEY", "")
+    
+    st.session_state["env_loaded"] = True
 
 def initialize_session_state():
     """Initialize session state variables"""
@@ -52,11 +50,11 @@ def initialize_session_state():
     if "is_authenticated" not in st.session_state:
         st.session_state["is_authenticated"] = False
     
-    # Initialize API keys from session state if they exist, otherwise from environment
+    # Initialize API keys from session state if they exist
     if "SCRAPINGANT_API_KEY" not in st.session_state:
-        st.session_state["SCRAPINGANT_API_KEY"] = os.getenv("SCRAPINGANT_API_KEY", "")
+        st.session_state["SCRAPINGANT_API_KEY"] = ""
     if "EXA_API_KEY" not in st.session_state:
-        st.session_state["EXA_API_KEY"] = os.getenv("EXA_API_KEY", "")
+        st.session_state["EXA_API_KEY"] = ""
     
     # Add session expiry check
     if "session_start" not in st.session_state:
@@ -123,6 +121,7 @@ with st.sidebar.expander("API Key Management", expanded=True):
         st.session_state["EXA_API_KEY"] = new_exa_key
         set_api_keys(new_scrapingant_key, new_exa_key)
         st.success("API keys saved successfully!")
+        st.rerun()  # Force a rerun to ensure the keys are properly set
 
 st.sidebar.markdown("---")
 st.sidebar.title("Navigation")

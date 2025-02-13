@@ -30,42 +30,41 @@ SCRAPINGANT_API_KEY: Optional[str] = None
 EXA_API_KEY: Optional[str] = None
 
 def set_api_keys(scrapingant_key: Optional[str] = None, exa_key: Optional[str] = None):
-    """Set API keys globally, with fallback to environment variables."""
+    """Set API keys globally."""
     global SCRAPINGANT_API_KEY, EXA_API_KEY
     
-    # If running locally (not in Streamlit Cloud), use environment variables
-    is_streamlit_cloud = os.getenv("STREAMLIT_DEPLOYMENT") == "true"
-    
-    if not is_streamlit_cloud:
-        # In local environment, prefer environment variables
-        SCRAPINGANT_API_KEY = os.getenv("SCRAPINGANT_API_KEY")
-        EXA_API_KEY = os.getenv("EXA_API_KEY")
-        logger.info("Using API keys from environment variables")
-    else:
-        # In Streamlit Cloud, use provided keys
+    # Set provided keys if they are not empty
+    if scrapingant_key:
         SCRAPINGANT_API_KEY = scrapingant_key
+        logger.info("Set ScrapingAnt API key from provided value")
+    
+    if exa_key:
         EXA_API_KEY = exa_key
-        logger.info("Using API keys from Streamlit configuration")
+        logger.info("Set Exa.ai API key from provided value")
+    
+    # If any key is still not set, try environment variables
+    if not SCRAPINGANT_API_KEY:
+        SCRAPINGANT_API_KEY = os.getenv("SCRAPINGANT_API_KEY", "")
+        if SCRAPINGANT_API_KEY:
+            logger.info("Set ScrapingAnt API key from environment")
+    
+    if not EXA_API_KEY:
+        EXA_API_KEY = os.getenv("EXA_API_KEY", "")
+        if EXA_API_KEY:
+            logger.info("Set Exa.ai API key from environment")
 
 def validate_api_keys():
     """Validate that required API keys are set."""
     global SCRAPINGANT_API_KEY, EXA_API_KEY
     
-    # If keys are not set, try to load from environment
     if not SCRAPINGANT_API_KEY or not EXA_API_KEY:
-        set_api_keys()
+        # Try to get keys from environment first
+        SCRAPINGANT_API_KEY = os.getenv("SCRAPINGANT_API_KEY", "")
+        EXA_API_KEY = os.getenv("EXA_API_KEY", "")
     
+    # If still not set, raise appropriate error
     if not SCRAPINGANT_API_KEY or not EXA_API_KEY:
-        is_streamlit_cloud = os.getenv("STREAMLIT_DEPLOYMENT") == "true"
-        if is_streamlit_cloud:
-            raise ValueError(
-                "API keys are required. Please set your API keys in the sidebar before proceeding."
-            )
-        else:
-            raise ValueError(
-                "API keys are required. Please set SCRAPINGANT_API_KEY and EXA_API_KEY "
-                "in your .env file or environment variables."
-            )
+        raise ValueError("API keys are required. Please set your API keys in the sidebar before proceeding.")
 
 def get_required_env_var(var_name: str) -> str:
     """Get a required environment variable or raise an error with a helpful message."""
